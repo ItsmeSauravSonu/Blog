@@ -3,11 +3,15 @@ const router = express.Router()
 const Article = require('./../models/article')
 
 router.get('/new',(req,res)=>{
-    res.render('articles/new')
+    res.render('articles/new',{article: new Article()})
 })
 
-router.get('/:id',(req,res)=>{
-
+router.get('/:slug',async (req,res)=>{
+    const article =await Article.findOne({slug:req.params.slug})
+    if(article==null) {
+        res.redirect('/')
+    }
+res.render('articles/show', {article: article})
 })
 
 
@@ -21,10 +25,17 @@ markdown: req.body.markdown
 
 try{
 article = await article.save()
-res.redirect(`/articles/${article.id}`)
+res.redirect(`/articles/${article.slug}`)
 }catch(e){
 res.render('articles/new',{article:article})
 }
 
 })
+
+router.delete('/:id',async (req,res)=>{
+await Article.findByIdAndDelete(req.params.id)
+res.redirect('/')
+})
+
+
 module.exports = router
